@@ -7,10 +7,11 @@ import java.util.*;
 
 public class AppCliente {
 
-    private static final String URL_SERVIDOR = "http://localhost:8080";
+    private static final String URL_SERVIDOR = "https://verbose-robot-5rqvgp67v44c4qv4-8080.app.github.dev";
     private static final String ENDPOINT_LIVROS = "/biblioteca/livros";
     private static final String ENDPOINT_LIVROTITULO = "/biblioteca/livrotitulo/";
     private static final String ENDPOINT_NOVOLIVRO = "/biblioteca/novolivro";
+    private static final String ENDPOINT_LIVROLETRA = "/biblioteca/livroletra/";
 
     private Scanner entrada = new Scanner(System.in);
 
@@ -18,7 +19,8 @@ public class AppCliente {
         consultarTodosLivros();
         cadastrarLivro();
         consultarTodosLivros();
-        consultarLivroPorTitulo();
+        // consultarLivroPorTitulo();
+        consultarLivroPorLetra();
     }
 
     // Consulta todos os livros
@@ -109,6 +111,38 @@ public class AppCliente {
 
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    
+    // Consulta um livro por uma letra
+    public void consultarLivroPorLetra() {
+        System.out.println("==============================");
+        System.out.print("Digite uma letra: ");
+        String letra = entrada.nextLine();
+        letra = LivroUtils.ajustaString(letra);
+
+        String urlRequisicao = URL_SERVIDOR + ENDPOINT_LIVROLETRA + letra;
+        System.out.println("URL:" + urlRequisicao);
+
+        try {
+            HttpClient httpClient = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest
+                    .newBuilder(URI.create(urlRequisicao))
+                    .GET()
+                    .build();
+
+            HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+
+            int statusCode = response.statusCode();
+            System.out.println("HTTP status: " + statusCode);
+
+            System.out.println("Livros: ");
+            Livro livro = LivroUtils.toObject(response.body());
+            System.out.println(livro);
+
+        } catch (Exception e) {
+            System.out.println("Livros nao encontrados.");
         }
     }
 
